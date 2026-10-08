@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "app.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -98,17 +99,18 @@ HAL_UART_Transmit(
     strlen(msg),
     HAL_MAX_DELAY
 );
+App_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    HAL_Delay(500);
+		
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+		 App_Run();
   }
   /* USER CODE END 3 */
 }
