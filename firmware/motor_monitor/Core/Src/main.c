@@ -28,6 +28,7 @@
 #include "cli.h"
 #include "dht11.h"
 #include "sensor_manager.h"
+#include "fault_manager.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,6 +106,8 @@ int main(void)
 	DHT11_Init(&htim2);
 	
 	SensorManager_Init();
+	
+	FaultManager_Init();
 
   App_Init();
 
@@ -122,6 +125,8 @@ int main(void)
 		App_Run();
 		
 		SensorManager_Process();
+		
+		 FaultManager_Process();
 		
 		CLI_Process();
   }

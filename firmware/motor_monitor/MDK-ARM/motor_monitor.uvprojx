@@ -642,6 +642,11 @@
               <FileType>1</FileType>
               <FilePath>..\Services\Src\sensor_manager.c</FilePath>
             </File>
+            <File>
+              <FileName>fault_manager.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Services\Src\fault_manager.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
