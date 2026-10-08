@@ -1,0 +1,41 @@
+cat > .gitignore <<'EOF'
+# =========================
+# VS Code
+# =========================
+.vscode/
+**/.vscode/
+
+# =========================
+# Keil user-specific files
+# =========================
+*.uvguix.*
+*.uvoptx
+
+# =========================
+# Keil build output
+# =========================
+**/MDK-ARM/Objects/
+**/MDK-ARM/Listings/
+**/MDK-ARM/motor_monitor/
+
+# Build artifacts
+*.o
+*.d
+*.axf
+*.hex
+*.map
+*.lnp
+*.dep
+*.build_log.htm
+
+# =========================
+# Temporary / OS files
+# =========================
+*.bak
+*.tmp
+*.log
+
+Thumbs.db
+Desktop.ini
+.DS_Store
+EOF
