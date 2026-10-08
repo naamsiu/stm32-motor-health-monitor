@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "logger.h"
 #include "app.h"
 #include <string.h>
 /* USER CODE END Includes */
@@ -91,15 +92,9 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-	char msg[] = "Motor Monitor v0.1.0\r\n";
+	Logger_Init(&huart1);
 
-HAL_UART_Transmit(
-    &huart1,
-    (uint8_t *)msg,
-    strlen(msg),
-    HAL_MAX_DELAY
-);
-App_Init();
+  App_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */

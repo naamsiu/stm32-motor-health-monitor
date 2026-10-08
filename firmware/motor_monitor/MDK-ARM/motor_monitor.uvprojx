@@ -508,6 +508,16 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>Services</GroupName>
+          <Files>
+            <File>
+              <FileName>logger.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Services\Src\logger.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
