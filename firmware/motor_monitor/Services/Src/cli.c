@@ -5,6 +5,7 @@
 #include "app.h"
 #include "sensor_manager.h"
 #include "fault_manager.h"
+#include "light_sensor.h"
 
 
 #include <stdbool.h>
@@ -48,6 +49,7 @@ static void CLI_CmdClear(int argc, char *argv[]);
 static void CLI_CmdReset(int argc, char *argv[]);
 static void CLI_CmdSensor(int argc,char *argv[]);
 static void CLI_CmdFault(int argc,char *argv[]);
+static void CLI_CmdLight(int argc,char *argv[]);
 
 static const CLI_Command_t commands[] =
 {
@@ -86,6 +88,12 @@ static const CLI_Command_t commands[] =
     "sensor",
     "Read DHT11 temperature and humidity",
     CLI_CmdSensor
+    },
+    {
+    "light",
+    "light",
+    "Read analog light sensor",
+    CLI_CmdLight
     },
     {
     "fault",
@@ -226,6 +234,52 @@ static void CLI_CmdFault(
             );
         }
     }
+}
+static void CLI_CmdLight(
+    int argc,
+    char *argv[])
+{
+    (void)argc;
+    (void)argv;
+
+    uint16_t raw;
+
+    LightSensor_Status_t status =
+        LightSensor_Read(&raw);
+
+    if (status != LIGHT_SENSOR_OK)
+    {
+        Logger_Print(
+            "Light sensor read error\r\n"
+        );
+
+        return;
+    }
+
+
+    uint16_t inverted =
+        LightSensor_Invert(raw);
+
+    uint8_t percent =
+        LightSensor_ToPercent(raw);
+
+
+    char buffer[128];
+
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "Light Sensor\r\n"
+        "------------\r\n"
+        "ADC raw    : %u\r\n"
+        "Inverted   : %u\r\n"
+        "Brightness : %u %%\r\n",
+        raw,
+        inverted,
+        percent
+    );
+
+    Logger_Print(buffer);
 }
 
 static int CLI_Tokenize(
