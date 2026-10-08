@@ -3,6 +3,7 @@
 #include "stm32f1xx_hal.h"
 #include "logger.h"
 
+
 static AppLedMode_t led_mode = APP_LED_OFF;
 
 static uint32_t last_blink_tick = 0;
@@ -52,4 +53,9 @@ void App_Run(void)
             last_blink_tick = now;
         }
     }
+}
+
+AppLedMode_t App_GetLedMode(void)
+{
+    return led_mode;
 }
