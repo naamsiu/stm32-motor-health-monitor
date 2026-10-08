@@ -3,6 +3,7 @@
 #include "logger.h"
 #include "bsp_led.h"
 #include "app.h"
+#include "dht11.h"
 
 
 #include <stdbool.h>
@@ -44,6 +45,7 @@ static void CLI_CmdUptime(int argc, char *argv[]);
 static void CLI_CmdLed(int argc, char *argv[]);
 static void CLI_CmdClear(int argc, char *argv[]);
 static void CLI_CmdReset(int argc, char *argv[]);
+static void CLI_CmdSensor(int argc,char *argv[]);
 
 static const CLI_Command_t commands[] =
 {
@@ -76,6 +78,12 @@ static const CLI_Command_t commands[] =
         "led <on|off|blink>",
         "Control status LED",
         CLI_CmdLed
+    },
+    {
+    "sensor",
+    "sensor",
+    "Read DHT11 temperature and humidity",
+    CLI_CmdSensor
     },
     {
         "clear",
@@ -138,6 +146,114 @@ static int CLI_Tokenize(
     }
 
     return argc;
+}
+
+static void CLI_CmdSensor(
+    int argc,
+    char *argv[])
+{
+    (void)argc;
+    (void)argv;
+
+    DHT11_Data_t data;
+
+    DHT11_Status_t status =
+        DHT11_Read(&data);
+
+    char buffer[128];
+
+    switch (status)
+    {
+        case DHT11_OK:
+
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "DHT11\r\n"
+                "-----\r\n"
+                "Temperature : %u C\r\n"
+                "Humidity    : %u %%\r\n"
+                "Checksum    : OK\r\n",
+                data.temperature,
+                data.humidity
+            );
+
+            Logger_Print(buffer);
+
+            break;
+
+
+        case DHT11_ERROR_RESPONSE_LOW:
+
+            Logger_Print(
+                "DHT11: no initial LOW response\r\n"
+            );
+
+            break;
+
+
+        case DHT11_ERROR_RESPONSE_HIGH:
+
+            Logger_Print(
+                "DHT11: response LOW detected, HIGH missing\r\n"
+            );
+
+            break;
+
+
+        case DHT11_ERROR_RESPONSE_END:
+
+            Logger_Print(
+                "DHT11: response HIGH detected, data start missing\r\n"
+            );
+
+            break;
+
+
+        case DHT11_ERROR_BIT_START:
+
+            Logger_Print(
+                "DHT11: timeout waiting for bit HIGH\r\n"
+            );
+
+            break;
+
+
+        case DHT11_ERROR_BIT_END:
+
+            Logger_Print(
+                "DHT11: bit HIGH pulse timeout\r\n"
+            );
+
+            break;
+
+
+        case DHT11_ERROR_CHECKSUM:
+
+            Logger_Print(
+                "DHT11: checksum error\r\n"
+            );
+
+            break;
+
+
+        case DHT11_ERROR_PARAM:
+
+            Logger_Print(
+                "DHT11: initialization error\r\n"
+            );
+
+            break;
+
+
+        default:
+
+            Logger_Print(
+                "DHT11: unknown error\r\n"
+            );
+
+            break;
+    }
 }
 
 static void CLI_ExecuteCommand(char *line)
