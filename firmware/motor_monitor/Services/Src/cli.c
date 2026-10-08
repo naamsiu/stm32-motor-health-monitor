@@ -4,6 +4,7 @@
 #include "bsp_led.h"
 #include "app.h"
 #include "sensor_manager.h"
+#include "fault_manager.h"
 
 
 #include <stdbool.h>
@@ -46,6 +47,7 @@ static void CLI_CmdLed(int argc, char *argv[]);
 static void CLI_CmdClear(int argc, char *argv[]);
 static void CLI_CmdReset(int argc, char *argv[]);
 static void CLI_CmdSensor(int argc,char *argv[]);
+static void CLI_CmdFault(int argc,char *argv[]);
 
 static const CLI_Command_t commands[] =
 {
@@ -86,6 +88,12 @@ static const CLI_Command_t commands[] =
     CLI_CmdSensor
     },
     {
+        "fault",
+        "fault",
+        "Show active system faults",
+        CLI_CmdFault
+    },
+    {
         "clear",
         "clear",
         "Clear terminal",
@@ -103,6 +111,56 @@ static const CLI_Command_t commands[] =
     (sizeof(commands) / sizeof(commands[0]))
 
 
+static void CLI_CmdFault(
+    int argc,
+    char *argv[])
+{
+    (void)argc;
+    (void)argv;
+
+    Logger_Print("Fault Status\r\n");
+    Logger_Print("------------\r\n");
+
+    Logger_Print("System : ");
+    Logger_Print(
+        FaultManager_GetStateString()
+    );
+    Logger_Print("\r\n");
+
+
+    uint32_t faults =
+        FaultManager_GetActiveFaults();
+
+    if (faults == FAULT_NONE)
+    {
+        Logger_Print(
+            "Active faults: NONE\r\n"
+        );
+
+        return;
+    }
+
+
+    Logger_Print("Active faults:\r\n");
+
+
+    if (FaultManager_IsFaultActive(
+            FAULT_SENSOR_FAILURE))
+    {
+        Logger_Print(
+            "- SENSOR_FAILURE\r\n"
+        );
+    }
+
+
+    if (FaultManager_IsFaultActive(
+            FAULT_OVER_TEMPERATURE))
+    {
+        Logger_Print(
+            "- OVER_TEMPERATURE\r\n"
+        );
+    }
+}
 
 static int CLI_Tokenize(
     char *line,
@@ -341,9 +399,7 @@ static const char *CLI_GetLedModeString(void)
     }
 }
 
-static void CLI_CmdStatus(
-    int argc,
-    char *argv[])
+static void CLI_CmdStatus(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
@@ -363,11 +419,13 @@ static void CLI_CmdStatus(
             "LED mode    : %s\r\n"
             "Temperature : %u C\r\n"
             "Humidity    : %u %%\r\n"
+            "Fault       : %s\r\n"
             "Uptime      : %lu s\r\n"
             "RX drops    : %lu\r\n",
             CLI_GetLedModeString(),
             sensor->temperature,
             sensor->humidity,
+            FaultManager_GetStateString(),
             (unsigned long)(
                 HAL_GetTick() / 1000U
             ),
@@ -383,9 +441,11 @@ static void CLI_CmdStatus(
             "-------------\r\n"
             "LED mode    : %s\r\n"
             "Sensor      : INVALID\r\n"
+            "Fault       : %s\r\n"
             "Uptime      : %lu s\r\n"
             "RX drops    : %lu\r\n",
             CLI_GetLedModeString(),
+            FaultManager_GetStateString(),
             (unsigned long)(
                 HAL_GetTick() / 1000U
             ),
