@@ -27,6 +27,7 @@
 #include "logger.h"
 #include "cli.h"
 #include "dht11.h"
+#include "sensor_manager.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -102,6 +103,8 @@ int main(void)
 	Logger_Init(&huart1);
 	
 	DHT11_Init(&htim2);
+	
+	SensorManager_Init();
 
   App_Init();
 
@@ -116,7 +119,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		 App_Run();
+		App_Run();
+		
+		SensorManager_Process();
+		
 		CLI_Process();
   }
   /* USER CODE END 3 */

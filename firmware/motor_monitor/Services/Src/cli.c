@@ -3,7 +3,7 @@
 #include "logger.h"
 #include "bsp_led.h"
 #include "app.h"
-#include "dht11.h"
+#include "sensor_manager.h"
 
 
 #include <stdbool.h>
@@ -155,105 +155,43 @@ static void CLI_CmdSensor(
     (void)argc;
     (void)argv;
 
-    DHT11_Data_t data;
+    const SensorData_t *data =
+        SensorManager_GetData();
 
-    DHT11_Status_t status =
-        DHT11_Read(&data);
+    char buffer[160];
 
-    char buffer[128];
-
-    switch (status)
+    if (!data->valid)
     {
-        case DHT11_OK:
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "Sensor data unavailable\r\n"
+            "Last error : %u\r\n",
+            (unsigned int)data->last_error
+        );
 
-            snprintf(
-                buffer,
-                sizeof(buffer),
-                "DHT11\r\n"
-                "-----\r\n"
-                "Temperature : %u C\r\n"
-                "Humidity    : %u %%\r\n"
-                "Checksum    : OK\r\n",
-                data.temperature,
-                data.humidity
-            );
+        Logger_Print(buffer);
 
-            Logger_Print(buffer);
-
-            break;
-
-
-        case DHT11_ERROR_RESPONSE_LOW:
-
-            Logger_Print(
-                "DHT11: no initial LOW response\r\n"
-            );
-
-            break;
-
-
-        case DHT11_ERROR_RESPONSE_HIGH:
-
-            Logger_Print(
-                "DHT11: response LOW detected, HIGH missing\r\n"
-            );
-
-            break;
-
-
-        case DHT11_ERROR_RESPONSE_END:
-
-            Logger_Print(
-                "DHT11: response HIGH detected, data start missing\r\n"
-            );
-
-            break;
-
-
-        case DHT11_ERROR_BIT_START:
-
-            Logger_Print(
-                "DHT11: timeout waiting for bit HIGH\r\n"
-            );
-
-            break;
-
-
-        case DHT11_ERROR_BIT_END:
-
-            Logger_Print(
-                "DHT11: bit HIGH pulse timeout\r\n"
-            );
-
-            break;
-
-
-        case DHT11_ERROR_CHECKSUM:
-
-            Logger_Print(
-                "DHT11: checksum error\r\n"
-            );
-
-            break;
-
-
-        case DHT11_ERROR_PARAM:
-
-            Logger_Print(
-                "DHT11: initialization error\r\n"
-            );
-
-            break;
-
-
-        default:
-
-            Logger_Print(
-                "DHT11: unknown error\r\n"
-            );
-
-            break;
+        return;
     }
+
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "DHT11\r\n"
+        "-----\r\n"
+        "Temperature : %u C\r\n"
+        "Humidity    : %u %%\r\n"
+        "Age         : %lu ms\r\n",
+        data->temperature,
+        data->humidity,
+        (unsigned long)(
+            HAL_GetTick()
+            - data->last_update_ms
+        )
+    );
+
+    Logger_Print(buffer);
 }
 
 static void CLI_ExecuteCommand(char *line)
@@ -410,20 +348,50 @@ static void CLI_CmdStatus(
     (void)argc;
     (void)argv;
 
-    char buffer[128];
+    char buffer[192];
 
-    snprintf(
-        buffer,
-        sizeof(buffer),
-        "System Status\r\n"
-        "-------------\r\n"
-        "LED mode : %s\r\n"
-        "Uptime   : %lu s\r\n"
-        "RX drops : %lu\r\n",
-        CLI_GetLedModeString(),
-        (unsigned long)(HAL_GetTick() / 1000U),
-        (unsigned long)rx_drop_count
-    );
+    const SensorData_t *sensor =
+        SensorManager_GetData();
+
+    if (sensor->valid)
+    {
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "System Status\r\n"
+            "-------------\r\n"
+            "LED mode    : %s\r\n"
+            "Temperature : %u C\r\n"
+            "Humidity    : %u %%\r\n"
+            "Uptime      : %lu s\r\n"
+            "RX drops    : %lu\r\n",
+            CLI_GetLedModeString(),
+            sensor->temperature,
+            sensor->humidity,
+            (unsigned long)(
+                HAL_GetTick() / 1000U
+            ),
+            (unsigned long)rx_drop_count
+        );
+    }
+    else
+    {
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "System Status\r\n"
+            "-------------\r\n"
+            "LED mode    : %s\r\n"
+            "Sensor      : INVALID\r\n"
+            "Uptime      : %lu s\r\n"
+            "RX drops    : %lu\r\n",
+            CLI_GetLedModeString(),
+            (unsigned long)(
+                HAL_GetTick() / 1000U
+            ),
+            (unsigned long)rx_drop_count
+        );
+    }
 
     Logger_Print(buffer);
 }

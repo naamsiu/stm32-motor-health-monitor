@@ -637,6 +637,11 @@
               <FileType>1</FileType>
               <FilePath>..\Services\Src\cli.c</FilePath>
             </File>
+            <File>
+              <FileName>sensor_manager.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Services\Src\sensor_manager.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
