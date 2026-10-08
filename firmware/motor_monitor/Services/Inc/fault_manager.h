@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+
 typedef enum
 {
     SYSTEM_STATE_NORMAL = 0,
@@ -17,8 +18,11 @@ typedef enum
 {
     FAULT_NONE = 0,
 
-    FAULT_SENSOR_FAILURE = (1U << 0),
-    FAULT_OVER_TEMPERATURE = (1U << 1)
+    FAULT_SENSOR_FAILURE =
+        (1U << 0),
+
+    FAULT_OVER_TEMPERATURE =
+        (1U << 1)
 
 } FaultCode_t;
 
@@ -27,12 +31,32 @@ void FaultManager_Init(void);
 
 void FaultManager_Process(void);
 
-SystemState_t FaultManager_GetSystemState(void);
 
-uint32_t FaultManager_GetActiveFaults(void);
+SystemState_t
+FaultManager_GetSystemState(void);
 
-bool FaultManager_IsFaultActive(FaultCode_t fault);
 
-const char *FaultManager_GetStateString(void);
+uint32_t
+FaultManager_GetActiveFaults(void);
+
+
+uint32_t
+FaultManager_GetFaultHistory(void);
+
+
+uint32_t
+FaultManager_GetLastChangeMs(void);
+
+
+bool FaultManager_IsFaultActive(
+    FaultCode_t fault);
+
+
+const char *
+FaultManager_GetStateString(void);
+
+
+void FaultManager_ClearHistory(void);
+
 
 #endif

@@ -88,11 +88,11 @@ static const CLI_Command_t commands[] =
     CLI_CmdSensor
     },
     {
-        "fault",
-        "fault",
-        "Show active system faults",
-        CLI_CmdFault
-    },
+    "fault",
+    "fault [clear]",
+    "Show or clear fault history",
+    CLI_CmdFault
+},
     {
         "clear",
         "clear",
@@ -115,50 +115,116 @@ static void CLI_CmdFault(
     int argc,
     char *argv[])
 {
-    (void)argc;
-    (void)argv;
-
-    Logger_Print("Fault Status\r\n");
-    Logger_Print("------------\r\n");
-
-    Logger_Print("System : ");
-    Logger_Print(
-        FaultManager_GetStateString()
-    );
-    Logger_Print("\r\n");
-
-
-    uint32_t faults =
-        FaultManager_GetActiveFaults();
-
-    if (faults == FAULT_NONE)
+    if (argc == 2)
     {
+        if (strcmp(argv[1], "clear") == 0)
+        {
+            FaultManager_ClearHistory();
+
+            Logger_Print(
+                "Fault history cleared\r\n"
+            );
+
+            return;
+        }
+
         Logger_Print(
-            "Active faults: NONE\r\n"
+            "Usage: fault [clear]\r\n"
         );
 
         return;
     }
 
 
-    Logger_Print("Active faults:\r\n");
-
-
-    if (FaultManager_IsFaultActive(
-            FAULT_SENSOR_FAILURE))
+    if (argc != 1)
     {
         Logger_Print(
-            "- SENSOR_FAILURE\r\n"
+            "Usage: fault [clear]\r\n"
         );
+
+        return;
     }
 
 
-    if (FaultManager_IsFaultActive(
-            FAULT_OVER_TEMPERATURE))
+    Logger_Print(
+        "Fault Status\r\n"
+        "------------\r\n"
+    );
+
+    Logger_Print("System : ");
+
+    Logger_Print(
+        FaultManager_GetStateString()
+    );
+
+    Logger_Print("\r\n");
+
+
+    uint32_t active =
+        FaultManager_GetActiveFaults();
+
+
+    if (active == FAULT_NONE)
     {
         Logger_Print(
-            "- OVER_TEMPERATURE\r\n"
+            "Active faults : NONE\r\n"
         );
+    }
+    else
+    {
+        Logger_Print(
+            "Active faults:\r\n"
+        );
+
+        if (FaultManager_IsFaultActive(
+                FAULT_SENSOR_FAILURE))
+        {
+            Logger_Print(
+                "- SENSOR_FAILURE\r\n"
+            );
+        }
+
+        if (FaultManager_IsFaultActive(
+                FAULT_OVER_TEMPERATURE))
+        {
+            Logger_Print(
+                "- OVER_TEMPERATURE\r\n"
+            );
+        }
+    }
+
+
+    uint32_t history =
+        FaultManager_GetFaultHistory();
+
+
+    if (history == FAULT_NONE)
+    {
+        Logger_Print(
+            "History       : NONE\r\n"
+        );
+    }
+    else
+    {
+        Logger_Print(
+            "History:\r\n"
+        );
+
+        if ((history &
+             FAULT_SENSOR_FAILURE) != 0U)
+        {
+            Logger_Print(
+                "- SENSOR_FAILURE\r\n"
+            );
+        }
+
+        if ((history &
+             FAULT_OVER_TEMPERATURE) != 0U)
+        {
+            Logger_Print(
+                "- OVER_TEMPERATURE\r\n"
+            );
+        }
     }
 }
 

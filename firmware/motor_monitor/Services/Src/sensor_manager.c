@@ -15,6 +15,9 @@ void SensorManager_Init(void)
     sensor_data.valid = false;
 
     sensor_data.last_update_ms = 0;
+    sensor_data.last_sample_ms = 0;
+
+    sensor_data.sample_sequence = 0;
 
     sensor_data.last_error = DHT11_OK;
 
@@ -26,7 +29,8 @@ void SensorManager_Process(void)
 {
     uint32_t now = HAL_GetTick();
 
-    if ((now - last_sample_tick) < SENSOR_UPDATE_PERIOD_MS)
+    if ((now - last_sample_tick) <
+        SENSOR_UPDATE_PERIOD_MS)
     {
         return;
     }
@@ -38,6 +42,11 @@ void SensorManager_Process(void)
     DHT11_Status_t status =
         DHT11_Read(&dht_data);
 
+    /*
+     * New sensor acquisition occurred
+     */
+    sensor_data.sample_sequence++;
+    sensor_data.last_sample_ms = now;
     sensor_data.last_error = status;
 
     if (status == DHT11_OK)
