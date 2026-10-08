@@ -15,6 +15,9 @@ typedef struct
     bool valid;
 
     uint32_t last_update_ms;
+    uint32_t last_sample_ms;
+
+    uint32_t sample_sequence;
 
     DHT11_Status_t last_error;
 
