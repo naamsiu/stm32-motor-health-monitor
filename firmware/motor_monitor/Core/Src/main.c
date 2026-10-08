@@ -24,6 +24,8 @@
 #include "logger.h"
 #include "app.h"
 #include <string.h>
+#include "logger.h"
+#include "cli.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,6 +97,8 @@ int main(void)
 	Logger_Init(&huart1);
 
   App_Init();
+
+  CLI_Init(&huart1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -106,6 +110,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		 App_Run();
+		CLI_Process();
   }
   /* USER CODE END 3 */
 }
@@ -216,6 +221,11 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_UART_RxCpltCallback(
+    UART_HandleTypeDef *huart)
+{
+    CLI_UART_RxCallback(huart);
+}
 /* USER CODE END 4 */
 
 /**
