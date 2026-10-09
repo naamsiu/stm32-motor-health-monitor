@@ -6,11 +6,13 @@
 #include "sensor_manager.h"
 #include "fault_manager.h"
 #include "light_sensor.h"
+#include "motor_manager.h"
 
 
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define CLI_COMMAND_SIZE 64
 #define CLI_MAX_ARGS         4
@@ -50,6 +52,7 @@ static void CLI_CmdReset(int argc, char *argv[]);
 static void CLI_CmdSensor(int argc,char *argv[]);
 static void CLI_CmdFault(int argc,char *argv[]);
 static void CLI_CmdLight(int argc,char *argv[]);
+static void CLI_CmdMotor(int argc,char *argv[]);
 
 static const CLI_Command_t commands[] =
 {
@@ -96,11 +99,17 @@ static const CLI_Command_t commands[] =
     CLI_CmdLight
     },
     {
+    "motor",
+    "motor <start|stop|forward|reverse|speed|status>",
+    "Control DC motor",
+    CLI_CmdMotor
+    },
+    {
     "fault",
     "fault [clear]",
     "Show or clear fault history",
     CLI_CmdFault
-},
+    },
     {
         "clear",
         "clear",
@@ -233,6 +242,137 @@ static void CLI_CmdFault(
                 "- OVER_TEMPERATURE\r\n"
             );
         }
+    }
+}
+static void CLI_CmdMotor(
+    int argc,
+    char *argv[])
+{
+    if (argc < 2)
+    {
+        Logger_Print(
+            "Usage: motor <start|stop|forward|reverse|speed|status>\r\n"
+        );
+        return;
+    }
+
+    if (strcmp(argv[1], "start") == 0)
+    {
+        if (FaultManager_GetSystemState()
+            == SYSTEM_STATE_FAULT)
+        {
+            Logger_Print(
+                "Motor start blocked: system fault\r\n"
+            );
+            return;
+        }
+
+        MotorManager_Start();
+
+        Logger_Print("OK\r\n");
+    }
+
+    else if (strcmp(argv[1], "stop") == 0)
+    {
+        MotorManager_Stop();
+
+        Logger_Print("OK\r\n");
+    }
+
+    else if (strcmp(argv[1], "forward") == 0)
+    {
+        MotorManager_SetDirection(
+            MOTOR_DIR_FORWARD
+        );
+
+        Logger_Print("OK\r\n");
+    }
+
+    else if (strcmp(argv[1], "reverse") == 0)
+    {
+        MotorManager_SetDirection(
+            MOTOR_DIR_REVERSE
+        );
+
+        Logger_Print("OK\r\n");
+    }
+
+    else if (strcmp(argv[1], "speed") == 0)
+    {
+        if (argc != 3)
+        {
+            Logger_Print(
+                "Usage: motor speed <0-100>\r\n"
+            );
+            return;
+        }
+
+        char *end;
+
+        unsigned long speed =
+            strtoul(argv[2], &end, 10);
+
+        if ((*end != '\0') ||
+            (speed > 100U))
+        {
+            Logger_Print(
+                "Invalid speed. Use 0-100\r\n"
+            );
+            return;
+        }
+
+        MotorManager_SetSpeed(
+            (uint8_t)speed
+        );
+
+        char buffer[48];
+
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "Motor speed: %lu %%\r\n",
+            speed
+        );
+
+        Logger_Print(buffer);
+    }
+
+    else if (strcmp(argv[1], "status") == 0)
+    {
+        const MotorStatus_t *motor =
+            MotorManager_GetStatus();
+
+        char buffer[128];
+
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "Motor Status\r\n"
+            "------------\r\n"
+            "State     : %s\r\n"
+            "Direction : %s\r\n"
+            "Speed     : %u %%\r\n",
+            motor->state ==
+                MOTOR_STATE_RUNNING
+                ? "RUNNING"
+                : "STOPPED",
+
+            motor->direction ==
+                MOTOR_DIR_FORWARD
+                ? "FORWARD"
+                : "REVERSE",
+
+            motor->speed_percent
+        );
+
+        Logger_Print(buffer);
+    }
+
+    else
+    {
+        Logger_Print(
+            "Unknown motor command\r\n"
+        );
     }
 }
 static void CLI_CmdLight(

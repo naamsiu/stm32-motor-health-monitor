@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../App/Inc;../BSP/Inc;../Services/Inc;../Drivers/DHT11/Inc;..\Drivers\LightSensor\Inc</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../App/Inc;../BSP/Inc;../Services/Inc;../Drivers/DHT11/Inc;../Drivers/LightSensor/Inc;..\Drivers\Motor\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -759,6 +759,11 @@
               <FileType>1</FileType>
               <FilePath>..\Services\Src\fault_manager.c</FilePath>
             </File>
+            <File>
+              <FileName>motor_manager.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Services\Src\motor_manager.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -781,6 +786,16 @@
               <FileName>light_sensor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Drivers\LightSensor\Src\light_sensor.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Motor</GroupName>
+          <Files>
+            <File>
+              <FileName>motor_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\Motor\Src\motor_driver.c</FilePath>
             </File>
           </Files>
         </Group>
