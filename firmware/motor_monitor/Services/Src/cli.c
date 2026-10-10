@@ -7,6 +7,7 @@
 #include "fault_manager.h"
 #include "light_sensor.h"
 #include "motor_manager.h"
+#include "distance_manager.h"
 
 
 #include <stdbool.h>
@@ -53,6 +54,7 @@ static void CLI_CmdSensor(int argc,char *argv[]);
 static void CLI_CmdFault(int argc,char *argv[]);
 static void CLI_CmdLight(int argc,char *argv[]);
 static void CLI_CmdMotor(int argc,char *argv[]);
+static void CLI_CmdDistance(int argc, char *argv[]);
 
 static const CLI_Command_t commands[] =
 {
@@ -97,6 +99,12 @@ static const CLI_Command_t commands[] =
     "light",
     "Read analog light sensor",
     CLI_CmdLight
+    },
+    {
+    "distance",
+    "distance",
+    "Read HC-SR04 distance",
+    CLI_CmdDistance
     },
     {
     "motor",
@@ -243,6 +251,44 @@ static void CLI_CmdFault(
             );
         }
     }
+}
+static void CLI_CmdDistance(int argc, char *argv[])
+{
+    (void)argc;
+    (void)argv;
+
+    const DistanceData_t *data =
+        DistanceManager_GetData();
+
+    char buffer[160];
+
+    if (!data->valid)
+    {
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "Distance unavailable: %s\r\n",
+            DistanceManager_GetErrorString(
+                data->last_error
+            )
+        );
+
+        Logger_Print(buffer);
+        return;
+    }
+
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "Distance: %u mm (%u.%u cm)\r\n"
+        "Echo: %lu us\r\n",
+        (unsigned int)data->distance_mm,
+        (unsigned int)(data->distance_mm / 10U),
+        (unsigned int)(data->distance_mm % 10U),
+        (unsigned long)data->echo_us
+    );
+
+    Logger_Print(buffer);
 }
 static void CLI_CmdMotor(
     int argc,

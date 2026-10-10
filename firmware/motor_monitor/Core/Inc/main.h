@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define MOTOR_IN2_GPIO_Port GPIOB
 #define DHT11_DATA_Pin GPIO_PIN_12
 #define DHT11_DATA_GPIO_Port GPIOB
+#define HCSR04_TRIG_Pin GPIO_PIN_5
+#define HCSR04_TRIG_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
