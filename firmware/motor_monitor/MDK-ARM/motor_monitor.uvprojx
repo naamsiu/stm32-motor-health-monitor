@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../App/Inc;../BSP/Inc;../Services/Inc;../Drivers/DHT11/Inc;../Drivers/LightSensor/Inc;../Drivers/Motor/Inc;..\Drivers\HCSR04\Inc</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../App/Inc;../BSP/Inc;../Services/Inc;../Drivers/DHT11/Inc;../Drivers/LightSensor/Inc;../Drivers/Motor/Inc;../Drivers/HCSR04/Inc;..\Drivers\ACS712\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -811,6 +811,16 @@
               <FileName>hcsr04.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Drivers\HCSR04\Src\hcsr04.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ACS712</GroupName>
+          <Files>
+            <File>
+              <FileName>acs712.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\ACS712\Src\acs712.c</FilePath>
             </File>
           </Files>
         </Group>

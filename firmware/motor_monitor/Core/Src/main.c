@@ -32,6 +32,7 @@
 #include "light_sensor.h"
 #include "hcsr04.h"
 #include "distance_manager.h"
+#include "acs712.h"
 
 #include "motor_driver.h"
 #include "motor_manager.h"
@@ -129,13 +130,15 @@ int main(void)
 	
 	LightSensor_Init(&hadc1);
 	
+	ACS712_Init(&hadc1);
+			
 	SensorManager_Init();
 	
 	FaultManager_Init();
 	
 	MotorDriver_Init(
     &htim3,
-    TIM_CHANNEL_1
+    TIM_CHANNEL_1 
 	);
 	MotorManager_Init();
 	
