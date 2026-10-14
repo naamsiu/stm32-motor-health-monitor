@@ -117,6 +117,12 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+  /* STM32F1 ADC calibration: after HAL_ADC_Init, before ADC reads. */
+  if (HAL_ADCEx_Calibration_Start(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
 	Logger_Init(&huart1);
 	
 	DHT11_Init(&htim2);
@@ -131,6 +137,7 @@ int main(void)
     &htim3,
     TIM_CHANNEL_1
 	);
+	MotorManager_Init();
 	
 	HCSR04_Init();
 	DistanceManager_Init();
