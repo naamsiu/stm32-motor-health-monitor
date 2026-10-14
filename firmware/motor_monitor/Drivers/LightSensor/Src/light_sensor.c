@@ -22,6 +22,17 @@ LightSensor_Status_t LightSensor_Read(
     }
 
 
+    /* ADC1 is shared with ACS712 on PA1. Select PA0 each read. */
+    ADC_ChannelConfTypeDef config = {0};
+    config.Channel = ADC_CHANNEL_0;
+    config.Rank = ADC_REGULAR_RANK_1;
+    config.SamplingTime = ADC_SAMPLETIME_55CYCLES_5;
+
+    if (HAL_ADC_ConfigChannel(light_adc, &config) != HAL_OK)
+    {
+        return LIGHT_SENSOR_ERROR;
+    }
+
     if (HAL_ADC_Start(light_adc) != HAL_OK)
     {
         return LIGHT_SENSOR_ERROR;

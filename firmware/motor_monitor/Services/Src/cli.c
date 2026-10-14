@@ -8,7 +8,7 @@
 #include "light_sensor.h"
 #include "motor_manager.h"
 #include "distance_manager.h"
-
+#include "acs712.h"
 
 #include <stdbool.h>
 #include <string.h>
@@ -55,6 +55,7 @@ static void CLI_CmdFault(int argc,char *argv[]);
 static void CLI_CmdLight(int argc,char *argv[]);
 static void CLI_CmdMotor(int argc,char *argv[]);
 static void CLI_CmdDistance(int argc, char *argv[]);
+static void CLI_CmdCurrent(int argc, char *argv[]);
 
 static const CLI_Command_t commands[] =
 {
@@ -99,6 +100,12 @@ static const CLI_Command_t commands[] =
     "light",
     "Read analog light sensor",
     CLI_CmdLight
+    },
+    {
+    "current",
+    "current [calibrate]",
+    "Read PA1 ADC or calibrate zero current",
+    CLI_CmdCurrent
     },
     {
     "distance",
@@ -252,6 +259,143 @@ static void CLI_CmdFault(
         }
     }
 }
+
+/*
+ * CLI command:
+ *
+ * current
+ * current calibrate
+ */
+static void CLI_CmdCurrent(int argc, char *argv[])
+{
+    ACS712_Status_t result;
+    uint16_t raw;
+    char buffer[160];
+
+    /*
+     * Command: current calibrate
+     */
+    if ((argc == 2) &&
+        (strcmp(argv[1], "calibrate") == 0))
+    {
+        const MotorStatus_t *motor =
+            MotorManager_GetStatus();
+
+        /* Motor must be stopped */
+        if (motor->state != MOTOR_STATE_STOPPED)
+        {
+            Logger_Print(
+                "Stop motor before zero calibration.\r\n"
+            );
+            return;
+        }
+
+        /*
+         * Calibration requires zero current
+         * through ACS712.
+         */
+        result = ACS712_CalibrateZero();
+
+        if (result != ACS712_OK)
+        {
+            Logger_Print(
+                "ACS712 zero calibration failed.\r\n"
+            );
+            return;
+        }
+
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "ACS712 zero offset: %u ADC counts\r\n",
+            (unsigned int)ACS712_GetZeroRaw()
+        );
+
+        Logger_Print(buffer);
+
+        return;
+    }
+
+    /*
+     * Invalid arguments
+     */
+    if (argc != 1)
+    {
+        Logger_Print(
+            "Usage: current [calibrate]\r\n"
+        );
+        return;
+    }
+
+    /*
+     * Command: current
+     * Read average of 16 samples.
+     */
+    result = ACS712_ReadAverage(16U, &raw);
+
+    if (result != ACS712_OK)
+    {
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "ACS712 ADC read error (status=%u)\r\n",
+            (unsigned int)result
+        );
+
+        Logger_Print(buffer);
+        return;
+    }
+
+    /*
+     * Calculate approximate voltage at PA1.
+     * Assumes VDDA = 3300 mV.
+     *
+     * This is PA1 voltage, not necessarily
+     * the actual ACS712 OUT voltage.
+     */
+    uint32_t voltage_mv =
+        ((uint32_t)raw * 3300U + 2047U) / 4095U;
+
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "ACS712 PA1 raw: %u / 4095\r\n"
+        "PA1 voltage: ~%lu mV\r\n",
+        (unsigned int)raw,
+        (unsigned long)voltage_mv
+    );
+
+    Logger_Print(buffer);
+
+    /*
+     * Display zero offset and ADC difference
+     */
+    if (ACS712_IsCalibrated())
+    {
+        int32_t delta =
+            (int32_t)raw -
+            (int32_t)ACS712_GetZeroRaw();
+
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "Zero: %u\r\n"
+            "Delta: %ld ADC counts\r\n",
+            (unsigned int)ACS712_GetZeroRaw(),
+            (long)delta
+        );
+
+        Logger_Print(buffer);
+    }
+    else
+    {
+        Logger_Print(
+            "Zero not calibrated.\r\n"
+            "Run: current calibrate\r\n"
+        );
+    }
+}
+
 static void CLI_CmdDistance(int argc, char *argv[])
 {
     (void)argc;
